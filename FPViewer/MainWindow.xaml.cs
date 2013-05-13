@@ -21,7 +21,7 @@ namespace FPViewer
     public partial class MainWindow : Window
     {
         private const int ADDR_LEAF    = 0x3DD5E9;
-        private const int ADDR_SCROLL  = ADDR_LEAF + 0x80;
+        private const int ADDR_SCROLL  = ADDR_LEAF + 0x80 * 1;
         private const int ADDR_RICE    = ADDR_LEAF + 0x80 * 2;
         private const int ADDR_SWORD   = ADDR_LEAF + 0x80 * 3;
         private const int ADDR_ARROW   = ADDR_LEAF + 0x80 * 4;
@@ -29,10 +29,10 @@ namespace FPViewer
         private const int ADDR_RING    = ADDR_LEAF + 0x80 * 6;
         private const int ADDR_STAFF   = ADDR_LEAF + 0x80 * 7;
         private const int ADDR_GITAN   = ADDR_LEAF + 0x80 * 8;
-        private const int ADDR_MEAT    = ADDR_LEAF + 0x80 * 8;
-        private const int ADDR_FEATHER = ADDR_LEAF + 0x80 * 9;
-        private const int ADDR_POT     = ADDR_LEAF + 0x80 * 10;
-        private const int ADDR_SCROLL2 = ADDR_LEAF + 0x80 * 11;
+        private const int ADDR_MEAT    = ADDR_LEAF + 0x80 * 9;
+        private const int ADDR_FEATHER = ADDR_LEAF + 0x80 * 10;
+        private const int ADDR_POT     = ADDR_LEAF + 0x80 * 11;
+        private const int ADDR_SCROLL2 = ADDR_LEAF + 0x80 * 12;
 
         public MainWindow()
         {
@@ -55,7 +55,7 @@ namespace FPViewer
         private void DrawBitmap(Image image, byte[] data, byte[] pallete)
         {
             // Define parameters used to create the BitmapSource.
-            PixelFormat pf = PixelFormats.Bgr32;
+            PixelFormat pf = PixelFormats.Bgra32;
             int width = 16;
             int height = 16;
             int rawStride = (width * pf.BitsPerPixel) / 8;

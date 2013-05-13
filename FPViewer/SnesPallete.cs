@@ -22,7 +22,16 @@ namespace FPViewer
                 byte normalizedR = (byte)(r << 3 | (r & 0x1c) >> 2);
                 byte normalizedG = (byte)(g << 3 | (g & 0x1c) >> 2);
                 byte normalizedB = (byte)(b << 3 | (b & 0x1c) >> 2);
-                data[i / 2] = (int)(normalizedB<< 16 | normalizedG << 8| normalizedR);
+                byte alpha;
+                if (normalizedR == 0 && normalizedG == 0 && normalizedB == 0)
+                {
+                    alpha = 0;
+                }
+                else
+                {
+                    alpha = 0xff;
+                }
+                data[i / 2] = (int)(normalizedB<< 16| normalizedG << 8 | normalizedR << 0 | alpha << 24);
             }
         }
     }
