@@ -34,30 +34,43 @@ namespace FPViewer
         private const int ADDR_POT     = ADDR_LEAF + 0x80 * 11;
         private const int ADDR_SCROLL2 = ADDR_LEAF + 0x80 * 12;
 
+        private const int ADDR_PALLETE_ITEM = 0x3BC5B9;
+        private const int ADDR_PALLETE_SHIREN = 0x3BC5F5;
+
+        private const int ADDR_SHIREN = 0x17F3C2;
+
         public MainWindow()
         {
             InitializeComponent();
 
             // 草データを読み込み
             System.IO.FileStream strm = System.IO.File.Open("rom.smc", System.IO.FileMode.Open, System.IO.FileAccess.Read);
-            strm.Seek(ADDR_LEAF, System.IO.SeekOrigin.Begin);
-            byte[] leaf = new byte[128]; // 32バイト*4個
-            strm.Read(leaf, 0, leaf.Length);
-
-            // 黒色の2バイトはROMに含まれない
+            byte[] leaf = new byte[32 * 4]; // 32バイト*4個
             byte[] pallete = new byte[32];
-            strm.Seek(0x3BC5B9, System.IO.SeekOrigin.Begin); 
-            strm.Read(pallete, 2, pallete.Length - 2);
+            ReadBitmapAndPallete(strm, ADDR_LEAF, leaf, ADDR_PALLETE_ITEM, pallete);
 
-            DrawBitmap(image1_1, leaf, pallete);
+            byte[] shiren = new byte[32 * 16]; // 32バイト*16個
+            byte[] palleteShiren = new byte[32];
+            ReadBitmapAndPallete(strm, ADDR_SHIREN, shiren, ADDR_PALLETE_SHIREN, palleteShiren);
+
+            DrawBitmap(image1_1, leaf, 16, 16, pallete);
+            DrawBitmap(image1_2, shiren, 32, 32, palleteShiren);
        }
 
-        private void DrawBitmap(Image image, byte[] data, byte[] pallete)
+        private static void ReadBitmapAndPallete(System.IO.FileStream strm, int addrBitmap, byte[] bitmap, int addrPallete, byte[] pallete)
+        {
+            strm.Seek(addrBitmap, System.IO.SeekOrigin.Begin);
+            strm.Read(bitmap, 0, bitmap.Length);
+
+            // 黒色の2バイトはROMに含まれない
+            strm.Seek(addrPallete, System.IO.SeekOrigin.Begin);
+            strm.Read(pallete, 2, pallete.Length - 2);
+        }
+
+        private void DrawBitmap(Image image, byte[] data, int width, int height, byte[] pallete)
         {
             // Define parameters used to create the BitmapSource.
             PixelFormat pf = PixelFormats.Bgra32;
-            int width = 16;
-            int height = 16;
             int rawStride = (width * pf.BitsPerPixel) / 8;
             ItemImage item = new ItemImage(data, pallete);
 
