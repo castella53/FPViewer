@@ -54,7 +54,6 @@ namespace FPViewer
             ReadBitmapAndPallete(strm, ADDR_SHIREN, shiren, ADDR_PALLETE_SHIREN, palleteShiren);
 
             DrawBitmap(image1_1, leaf, 16, 16, pallete);
-            DrawBitmap(image1_2, shiren, 32, 32, palleteShiren);
        }
 
         private static void ReadBitmapAndPallete(System.IO.FileStream strm, int addrBitmap, byte[] bitmap, int addrPallete, byte[] pallete)
@@ -72,7 +71,7 @@ namespace FPViewer
             // Define parameters used to create the BitmapSource.
             PixelFormat pf = PixelFormats.Bgra32;
             int rawStride = (width * pf.BitsPerPixel) / 8;
-            ItemImage item = new ItemImage(data, pallete);
+            ItemImage item = new ItemImage(width, height, data, pallete);
 
             // Create a BitmapSource.
             BitmapSource bitmap = BitmapSource.Create(width, height,

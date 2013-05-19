@@ -8,12 +8,17 @@ namespace FPViewer
 {
     class Snes4BppBitmap
     {
-        public byte[,] bitmap { get; private set; }
+        public const int Width = 8;
+        public const int Height = 8;
+        public const int Bpp = 4;
+        public const int Size = 32;
+
+        public byte[,] data { get; private set; }
         public Snes4BppBitmap(byte[] buf)
         {
             System.Diagnostics.Debug.Assert(buf.Length == 32);
 
-            bitmap = new byte[8, 8];
+            data = new byte[8, 8];
             for (int k = 0; k < 2; ++k)
             {
                 for (int i = 0; i < 16; i += 2)
@@ -23,8 +28,8 @@ namespace FPViewer
 
                     for (int j = 0; j < 8; ++j)
                     {
-                        bitmap[i / 2, j] += (byte)(bp0.At(7 - j) << k * 2);
-                        bitmap[i / 2, j] += (byte)(bp1.At(7 - j) << 1 + k * 2);
+                        data[i / 2, j] += (byte)(bp0.At(7 - j) << k * 2);
+                        data[i / 2, j] += (byte)(bp1.At(7 - j) << 1 + k * 2);
                     }
                 }
             }
