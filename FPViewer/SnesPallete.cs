@@ -23,7 +23,7 @@ namespace FPViewer
                 byte normalizedG = (byte)(g << 3 | (g & 0x1c) >> 2);
                 byte normalizedB = (byte)(b << 3 | (b & 0x1c) >> 2);
                 byte alpha;
-                if (normalizedR == 0 && normalizedG == 0 && normalizedB == 0)
+                if (i == 0)
                 {
                     alpha = 0;
                 }
