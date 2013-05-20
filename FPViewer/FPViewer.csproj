@@ -54,6 +54,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ItemImage.cs" />
+    <Compile Include="RomReader.cs" />
     <Compile Include="Snes4BppBitmap.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

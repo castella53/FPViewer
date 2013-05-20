@@ -13,7 +13,7 @@ namespace FPViewer
         public const int Bpp = 4;
         public const int Size = 32;
 
-        public byte[,] data { get; private set; }
+        private byte[,] data;
         public Snes4BppBitmap(byte[] buf)
         {
             System.Diagnostics.Debug.Assert(buf.Length == 32);
@@ -32,6 +32,14 @@ namespace FPViewer
                         data[i / 2, j] += (byte)(bp1.At(7 - j) << 1 + k * 2);
                     }
                 }
+            }
+        }
+
+        public IEnumerator<byte> GetEnumerator()
+        {
+            foreach (var i in data)
+            {
+                yield return i;
             }
         }
     }

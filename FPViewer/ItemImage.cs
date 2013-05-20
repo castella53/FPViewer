@@ -8,53 +8,77 @@ namespace FPViewer
 {
     class ItemImage
     {
-        public int[] rgbBitmap { get; private set; }
+        public enum ImageType { Item, Shiren }
+        private int[,] rgbBitmap;
 
         public ItemImage(int width, int height, byte[] romBgData, byte[] romPallete)
         {
-            int arrayNum = width / Snes4BppBitmap.Width * height / Snes4BppBitmap.Height;
-            Snes4BppBitmap[] snes4BppBitmapArray = new Snes4BppBitmap[arrayNum];
-            ConcatBitmapArray(romBgData, snes4BppBitmapArray);
+            Snes4BppBitmap[,] snes4BppBitmapArray = new Snes4BppBitmap[height / Snes4BppBitmap.Height, width / Snes4BppBitmap.Width];
+            SetupBitmapArray(romBgData, snes4BppBitmapArray);
 
             SnesPallete pallete = new SnesPallete(romPallete);
 
             Create(width, height, snes4BppBitmapArray, pallete);
         }
 
-        private void SetRgbBitmapRaw(int width, int height, Snes4BppBitmap bitmap, SnesPallete pallete, int rowOffset, int columnOffset)
+        public int[] GetRawImage()
         {
-            for (int i = 0; i < Snes4BppBitmap.Width * Snes4BppBitmap.Height; ++i)
+            int[] rawData = new int[rgbBitmap.Length];
+            int i = 0;
+            foreach (var bitmap in rgbBitmap)
             {
-                int bitmapRow = (i / Snes4BppBitmap.Width) + rowOffset;
-                int bitmapColumn = (i % Snes4BppBitmap.Height) + columnOffset;
+                rawData[i++] = bitmap;
+            }
 
-                int palletIndex = bitmap.data[i /Snes4BppBitmap.Width, i % Snes4BppBitmap.Height];
-                rgbBitmap[bitmapRow * width + bitmapColumn] = pallete.data[palletIndex];
+            return rawData;
+        }
+
+        private void SetRgbBitmap(int width, int height, Snes4BppBitmap bitmap, SnesPallete pallete, int rowOffset, int columnOffset)
+        {
+            int index = 0;
+            foreach (var i in bitmap)
+            {
+                int row = rowOffset * Snes4BppBitmap.Height + index / Snes4BppBitmap.Height;
+                int column = columnOffset * Snes4BppBitmap.Width + index % Snes4BppBitmap.Width;
+                    
+                rgbBitmap[row, column] = pallete.data[i];
+                index++;
             }
         }
 
-        private void Create(int width, int height, Snes4BppBitmap[] snes4BppBitmapArray, SnesPallete pallete)
+        private void Create(int width, int height, Snes4BppBitmap[,] snes4BppBitmapArray, SnesPallete pallete)
         {
-            rgbBitmap = new int[width * height];
+            rgbBitmap = new int[width, height];
 
-            // 1 2
-            // 3 4
-            for (int i = 0; i < snes4BppBitmapArray.Length; ++i)
+            if (width == 16)
             {
-                int rowOffset = Snes4BppBitmap.Height * (i / 2);
-                int columnOffset = Snes4BppBitmap.Width * (i % 2);
-                SetRgbBitmapRaw(width, height, snes4BppBitmapArray[i], pallete, rowOffset, columnOffset);
+                // 0 1
+                // 2 3
+                int index = 0;
+                foreach (var i in snes4BppBitmapArray)
+                {
+                    SetRgbBitmap(width, height, i, pallete, index / 2, index % 2);
+                    index++;
+                }
             }
         }
 
-        private void ConcatBitmapArray(byte[] romBgData, Snes4BppBitmap[] snes4BppBitmapArray)
+        private void SetupBitmapArray(byte[] romBgData, Snes4BppBitmap[,] snes4BppBitmapArray)
         {
-            byte[][] bmpArray = new byte[snes4BppBitmapArray.Length][];
-            for (int i = 0; i < bmpArray.Length; ++i)
+            System.Diagnostics.Debug.Assert(snes4BppBitmapArray.Rank == 2);
+
+            for (int i = 0; i < snes4BppBitmapArray.GetLength(0); ++i)
             {
-                bmpArray[i] = new byte[Snes4BppBitmap.Size];
-                Array.Copy(romBgData, i * Snes4BppBitmap.Size, bmpArray[i], 0, bmpArray[i].Length);
-                snes4BppBitmapArray[i] = new Snes4BppBitmap(bmpArray[i]);
+                for (int j = 0; j < snes4BppBitmapArray.GetLength(1); ++j)
+                {
+                    // [0,0] [0,1] [1,0] [1,1]
+                    //  0,   32,    64,   96
+                    // [0,0] [0,1] [0,2] [0,3] [1,0] [1,1] [1,2] [1,3]...
+                    //  0,   32,    64,   96    128   160   192   224
+                    byte[] subArray = new byte[Snes4BppBitmap.Size];
+                    Array.Copy(romBgData, (i * snes4BppBitmapArray.GetLength(1) + j) * Snes4BppBitmap.Size, subArray, 0, Snes4BppBitmap.Size);
+                    snes4BppBitmapArray[i, j] = new Snes4BppBitmap(subArray);
+                }
             }
         }
     }
