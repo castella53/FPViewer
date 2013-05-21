@@ -9,6 +9,8 @@ namespace FPViewer
     class SnesPallete
     {
         public int[] data {get; private set;}
+        public const int Size = 32;
+
         public SnesPallete(byte[] romPallete)
         {
             data = new int[16];

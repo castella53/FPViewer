@@ -11,7 +11,9 @@ namespace FPViewer
     class RomReader
     {
         public enum SpriteType { Item, Shiren }
-        System.IO.FileStream strm;
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        private SpriteType sprite;
 
         private const int ADDR_LEAF = 0x3DD5E9;
         private const int ADDR_SCROLL = ADDR_LEAF + 0x80 * 1;
@@ -32,43 +34,70 @@ namespace FPViewer
 
         private const int ADDR_SHIREN = 0x17F3C2;
 
+        private const int ITEM_WIDTH = 16;
+        private const int ITEM_HEIGHT = 16;
+        private const int ITEM_4BPP_NUM = 4;
+
+        private const int SHIREN_WIDTH = 32;
+        private const int SHIREN_HEIGHT = 32;
+        private const int SHIREN_4BPP_NUM = 16;
+
         private byte[] data;
         private byte[] pallet;
 
-        public RomReader()
+        public RomReader(SpriteType sprite)
         {
-            // 草データを読み込み
-            strm = System.IO.File.Open("rom.smc", System.IO.FileMode.Open, System.IO.FileAccess.Read);
+            this.sprite = sprite;
+            pallet = new byte[SnesPallete.Size];
+
+            using (System.IO.FileStream strm = System.IO.File.Open("rom.smc", System.IO.FileMode.Open, System.IO.FileAccess.Read))
+            {
+                if (this.sprite == SpriteType.Item)
+                {
+                    ReadItem(strm);
+                    Width = ITEM_WIDTH;
+                    Height = ITEM_HEIGHT;
+                }
+                else
+                {
+                    ReadShiren(strm);
+                    Width = SHIREN_WIDTH;
+                    Height = SHIREN_HEIGHT;
+                }
+            }
         }
 
-        public int[] GetSpriteData(SpriteType type)
+        public int[] GetSpriteData()
         {
-            pallet = new byte[32];
-            ItemImage image;
-            if (type == SpriteType.Item)
+            SpriteImage image;
+            if (sprite == SpriteType.Item)
             {
-                ReadItem();
-                image = new ItemImage(16, 16, data, pallet);
+                image = new SpriteImage(ITEM_WIDTH, ITEM_HEIGHT, data, pallet);
                 return image.GetRawImage();
             }
             else
             {
-                ReadShiren();
-                image = new ItemImage(32, 32, data, pallet);
+                image = new SpriteImage(SHIREN_WIDTH, SHIREN_HEIGHT, data, pallet);
                 return image.GetRawImage();
             }
         }
 
-        private void ReadItem()
+        private void ReadItem(System.IO.FileStream strm)
         {
-            data = new byte[32 * 4]; // 32バイト*4個
+            data = new byte[Snes4BppBitmap.Size * ITEM_4BPP_NUM]; 
             ReadBitmapAndPallete(strm, ADDR_LEAF, data, ADDR_PALLETE_ITEM, pallet);
         }
 
-        private void ReadShiren()
+        private void ReadShiren(System.IO.FileStream strm)
         {
-            data = new byte[32 * 16]; // 32バイト*16個
+            data = new byte[Snes4BppBitmap.Size * SHIREN_4BPP_NUM];
             ReadBitmapAndPallete(strm, ADDR_SHIREN, data, ADDR_PALLETE_SHIREN, pallet);
+            // 0 1 2 3 8 9 a b 4 5 6 7 c d e f というSnes4Bppの列から、
+            // 0 1 2 3 4 5 6 7 8 9 a b c d e f に変換する
+            byte[] tmp = new byte[data.Length];
+            Array.Copy(data, tmp, data.Length);
+            Array.Copy(tmp, 4 * Snes4BppBitmap.Size, data, 8 * Snes4BppBitmap.Size, 4 * Snes4BppBitmap.Size);
+            Array.Copy(tmp, 8 * Snes4BppBitmap.Size, data, 4 * Snes4BppBitmap.Size, 4 * Snes4BppBitmap.Size);
         }
 
         private void ReadBitmapAndPallete(System.IO.FileStream strm, int addrBitmap, byte[] bitmap, int addrPallete, byte[] pallete)
@@ -76,7 +105,7 @@ namespace FPViewer
             strm.Seek(addrBitmap, System.IO.SeekOrigin.Begin);
             strm.Read(bitmap, 0, bitmap.Length);
 
-            // 黒色の2バイトはROMに含まれない
+            // 透明色の2バイトはROMに含まれない
             strm.Seek(addrPallete, System.IO.SeekOrigin.Begin);
             strm.Read(pallete, 2, pallete.Length - 2);
         }

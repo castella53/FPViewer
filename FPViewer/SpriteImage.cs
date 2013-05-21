@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace FPViewer
 {
-    class ItemImage
+    class SpriteImage
     {
         public enum ImageType { Item, Shiren }
         private int[,] rgbBitmap;
 
-        public ItemImage(int width, int height, byte[] romBgData, byte[] romPallete)
+        public SpriteImage(int width, int height, byte[] romBgData, byte[] romPallete)
         {
             Snes4BppBitmap[,] snes4BppBitmapArray = new Snes4BppBitmap[height / Snes4BppBitmap.Height, width / Snes4BppBitmap.Width];
             SetupBitmapArray(romBgData, snes4BppBitmapArray);
@@ -50,16 +50,11 @@ namespace FPViewer
         {
             rgbBitmap = new int[width, height];
 
-            if (width == 16)
+            int index = 0;
+            foreach (var i in snes4BppBitmapArray)
             {
-                // 0 1
-                // 2 3
-                int index = 0;
-                foreach (var i in snes4BppBitmapArray)
-                {
-                    SetRgbBitmap(width, height, i, pallete, index / 2, index % 2);
-                    index++;
-                }
+                SetRgbBitmap(width, height, i, pallete, index / (width / Snes4BppBitmap.Width), index % (height / Snes4BppBitmap.Height));
+                index++;
             }
         }
 

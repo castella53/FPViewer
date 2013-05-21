@@ -39,8 +39,8 @@ namespace FPViewer
                 data, rawStride);
 
             // Set image source.
-            image.Width = 100;
-            image.Height = 100;
+            image.Width = width * 2;
+            image.Height = height * 2;
             image.Source = bitmap;
         }
 
@@ -49,9 +49,11 @@ namespace FPViewer
             if (!IsActivated)
             {
                 IsActivated = true;
-                RomReader reader = new RomReader();
-                DrawBitmap(image1_1, reader.GetSpriteData(RomReader.SpriteType.Item), 16, 16);
-                //DrawBitmap(image1_2, reader.GetSpriteData(RomReader.SpriteType.Item), 32, 32);
+
+                RomReader item = new RomReader(RomReader.SpriteType.Item);
+                DrawBitmap(image1_1, item.GetSpriteData(), item.Width, item.Height);
+                RomReader shiren = new RomReader(RomReader.SpriteType.Shiren);
+                DrawBitmap(image1_2, shiren.GetSpriteData(), shiren.Width, shiren.Height);
             }
         }
     }
