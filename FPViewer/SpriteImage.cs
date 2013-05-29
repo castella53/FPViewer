@@ -8,7 +8,7 @@ namespace FPViewer
 {
     class SpriteImage
     {
-        public enum ImageType { Item, Shiren }
+        public enum ImageType { Item, Shiren, Character }
         private int[,] rgbBitmap;
 
         public SpriteImage(int width, int height, byte[] romBgData, byte[] romPallete)

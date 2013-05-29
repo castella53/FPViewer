@@ -54,6 +54,8 @@ namespace FPViewer
                 DrawBitmap(image1_1, item.GetSpriteData(), item.Width, item.Height);
                 RomReader shiren = new RomReader(RomReader.SpriteType.Shiren);
                 DrawBitmap(image1_2, shiren.GetSpriteData(), shiren.Width, shiren.Height);
+                RomReader monster = new RomReader(RomReader.SpriteType.Character);
+                DrawBitmap(image1_3, monster.GetSpriteData(), monster.Width, monster.Height);
             }
         }
     }

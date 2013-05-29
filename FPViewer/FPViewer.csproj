@@ -53,6 +53,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BlockHeader.cs" />
+    <Compile Include="CompressedImage.cs" />
     <Compile Include="SpriteImage.cs" />
     <Compile Include="RomReader.cs" />
     <Compile Include="Snes4BppBitmap.cs" />
