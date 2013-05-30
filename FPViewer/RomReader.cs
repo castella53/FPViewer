@@ -10,7 +10,7 @@ namespace FPViewer
 {
     class RomReader
     {
-        public enum SpriteType { Item, Shiren, Character }
+        public enum SpriteType { Item, Shiren, Character1, Character2 }
         public int Width { get; private set; }
         public int Height { get; private set; }
         private SpriteType sprite;
@@ -37,6 +37,7 @@ namespace FPViewer
         private const int ADDR_SHIREN = 0x18180C + 1;
 
         private const int ADDR_KOZOU_TENGU = 0x12A57B;
+        private const int ADDR_MAMURU = 0x70000;
         private const int ADDR_SHINO_TSUKAI = 0x713A2;
     
         private const int ITEM_WIDTH = 16;
@@ -69,26 +70,21 @@ namespace FPViewer
                     Width = SHIREN_WIDTH;
                     Height = SHIREN_HEIGHT;
                 }
+                else if (this.sprite == SpriteType.Character1)
+                {
+                    ReadCharacter(strm, ADDR_SHINO_TSUKAI);
+                }
                 else
                 {
-                    ReadCharacter(strm);
+                    ReadCharacter(strm, ADDR_MAMURU);
                 }
             }
         }
 
         public int[] GetSpriteData()
         {
-            SpriteImage image;
-            if (sprite == SpriteType.Item)
-            {
-                image = new SpriteImage(Width, Height, data, pallet);
-                return image.GetRawImage();
-            }
-            else
-            {
-                image = new SpriteImage(Width, Height, data, pallet);
-                return image.GetRawImage();
-            }
+            SpriteImage image = new SpriteImage(Width, Height, data, pallet);
+            return image.GetRawImage();
         }
 
         private void ReadItem(System.IO.FileStream strm)
@@ -109,25 +105,31 @@ namespace FPViewer
             Array.Copy(tmp, 8 * Snes4BppBitmap.Size, data, 4 * Snes4BppBitmap.Size, 4 * Snes4BppBitmap.Size);
         }
 
-        private void ReadCharacter(System.IO.FileStream strm)
+        private void ReadCharacter(System.IO.FileStream strm, int addr)
         {
             CompressedImage image = new CompressedImage();
-            CompressedImage.Header header = image.GetHeader(strm, ADDR_SHINO_TSUKAI);
+            CompressedImage.Header header = image.GetHeader(strm, addr);
             Width = header.width;
             Height = header.height;
             ReadPallet(strm, ADDR_PALLET_CHARACTER1, pallet);
 
-            data = image.Extract(strm, ADDR_SHINO_TSUKAI);
+            data = image.Extract(strm, addr);
+            // 32x32の場合
             // 0 4 8 c 1 5 9 d 2 6 a e 3 7 b f というSnes4Bppの列から
             // 0 1 2 3 4 5 6 7 8 9 a b c d e f に変換する
+
+            // 24x32の場合
+            // 0 4 8 1 5 9 2 6 a 3 7 b
+            // 0 1 2 3 4 5 6 7 8 9 a b
+
             byte[] tmp = new byte[data.Length];
             Array.Copy(data, tmp, data.Length);
-            for (int i = 0; i < 4; ++i)
+            for (int i = 0; i < header.height / Snes4BppBitmap.Height; ++i)
             {
-                for (int j = 0; j < 4; ++j)
+                for (int j = 0; j < header.width / Snes4BppBitmap.Width; ++j)
                 {
-                    Array.Copy(tmp, (i + j * 4) * Snes4BppBitmap.Size, 
-                        data, (i * 4 + j) * Snes4BppBitmap.Size, Snes4BppBitmap.Size);
+                    Array.Copy(tmp, (i + j * header.height / Snes4BppBitmap.Height) * Snes4BppBitmap.Size, 
+                        data, (i * header.width / Snes4BppBitmap.Width + j) * Snes4BppBitmap.Size, Snes4BppBitmap.Size);
                 }
             }
         }

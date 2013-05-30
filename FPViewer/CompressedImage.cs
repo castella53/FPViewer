@@ -221,12 +221,12 @@ namespace FPViewer
             // ブロック数の計算
             int blockNum = header.width / Snes4BppBitmap.Width * header.height / Snes4BppBitmap.Height;
 
-            byte[] array = new byte[1];
+            byte[] oneByte = new byte[1];
             for (int i = 0; i < blockNum / 4; ++i)
             {
-                strm.Read(array, 0, 1);
+                strm.Read(oneByte, 0, 1);
                 // 各ブロックのタイプ取得
-                BlockHeader type = new BlockHeader(array[0]);
+                BlockHeader type = new BlockHeader(oneByte[0]);
                 for (int j = 0; j < 4; ++j)
                 {
                     ExtractCompressedBlock(strm, data, type.At(j));

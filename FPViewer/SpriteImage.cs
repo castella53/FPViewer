@@ -38,9 +38,9 @@ namespace FPViewer
             int index = 0;
             foreach (var i in bitmap)
             {
-                int row = rowOffset * Snes4BppBitmap.Height + index / Snes4BppBitmap.Height;
-                int column = columnOffset * Snes4BppBitmap.Width + index % Snes4BppBitmap.Width;
-                    
+                int row = rowOffset * Snes4BppBitmap.Width + index / Snes4BppBitmap.Width;
+                int column = columnOffset * Snes4BppBitmap.Height + index % Snes4BppBitmap.Height;
+
                 rgbBitmap[row, column] = pallete.data[i];
                 index++;
             }
@@ -48,12 +48,12 @@ namespace FPViewer
 
         private void Create(int width, int height, Snes4BppBitmap[,] snes4BppBitmapArray, SnesPallete pallete)
         {
-            rgbBitmap = new int[width, height];
+            rgbBitmap = new int[height, width];
 
             int index = 0;
             foreach (var i in snes4BppBitmapArray)
             {
-                SetRgbBitmap(width, height, i, pallete, index / (width / Snes4BppBitmap.Width), index % (height / Snes4BppBitmap.Height));
+                SetRgbBitmap(width, height, i, pallete, index / (width / Snes4BppBitmap.Width), index % (width / Snes4BppBitmap.Width));
                 index++;
             }
         }
@@ -69,6 +69,8 @@ namespace FPViewer
                     // [0,0] [0,1] [1,0] [1,1]
                     //  0,   32,    64,   96
                     // [0,0] [0,1] [0,2] [0,3] [1,0] [1,1] [1,2] [1,3]...
+                    //  0,   32,    64,   96    128   160   192   224
+                    // [0,0] [0,1] [0,2] [1,0] [1,1] [1,2] [2,0] [2,2]...
                     //  0,   32,    64,   96    128   160   192   224
                     byte[] subArray = new byte[Snes4BppBitmap.Size];
                     Array.Copy(romBgData, (i * snes4BppBitmapArray.GetLength(1) + j) * Snes4BppBitmap.Size, subArray, 0, Snes4BppBitmap.Size);
